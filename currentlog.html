@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Current Log</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.prog.label }} {{ form.prog }}<br>
+        </p>
+        <p>
+            {{ form.PIAstro.label }}<br>
+            {{ form.PIAstro(size=32) }}
+        </p>
+        <p>
+            {{ form.Observer.label }}<br>
+            {{ form.Observer(size=32) }}
+        </p>
+        <p>
+            {{ form.Instrument.label }}<br>
+            {{ form.Instrument(size=32) }}
+        </p>
+        <p>
+            {{ form.start_time.label }} {{ form.start_time }}<br>
+        </p>
+        <p>
+            {{ form.end_time.label }} {{ form.end_time }}<br>
+        </p>
+        <p>{{ form.progrow.label }} {{ form.progrow }}</p>
+        <p>{{ form.progdtn.label }} {{ form.progdtn }}</p>
+        <p>{{ form.weatherdark.label }} {{ form.weatherdark }} {{ form.weatherbright.label }} {{ form.weatherbright }}</p>
+        <p>{{ form.equipmentdark.label }} {{ form.equipmentdark }} {{ form.equipmentbright.label }} {{ form.equipmentbright }}</p>
+        <p>{{ form.obsdark.label }} {{ form.obsdark }} {{ form.obsbright.label }} {{ form.obsbright }}</p>
+        <p>{{ form.notuseddark.label }} {{ form.notuseddark }} {{ form.notusedbright.label }} {{ form.notusedbright }}</p>
+        <p>{{ form.notes.label }}<br>{{ form.notes(cols="50",rows="10",id='larger')}}</p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
