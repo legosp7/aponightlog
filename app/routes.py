@@ -2,15 +2,18 @@ from app import app, db
 from flask import render_template, flash, redirect, url_for, request
 from app.forms import LoginForm, CurrentLog, RegistrationForm
 import sqlalchemy as sa
+from datetime import date
+from apscheduler.schedulers.background import BackgroundScheduler
 #remove below
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User
+from app.models import User, Obslog, Proglog
 from urllib.parse import urlsplit
+
+
 
 
 @app.route('/') 
 @app.route('/home')
-@login_required #remove if login not needed
 def home():
     return render_template('home.html', title='Home')
 
@@ -69,9 +72,77 @@ def register():
 
 
 @app.route('/currentlog', methods=['GET', 'POST'])
-@login_required #remove if login not needed
 def currentlog():
     form = CurrentLog()
+    form.prog.choices = form.get_today_progs()  # Populate the program choices from the database
+    
+    if form.validate_on_submit():
+        today = date.today().strftime("%y%m%d")  # Get today's date in YYMMDD format
+        dateprog = form.prog.data + today
+        log = db.session.scalar(
+            sa.select(Obslog).where(Obslog.dateprog == dateprog)
+        )
+        #create a new log if it doesn't exist
+        if log is None:
+            newlog = Obslog(
+                dateprog=dateprog,
+                obsdate=date.today(),
+                prog=form.prog.data,
+                instrument=form.Instrument.data,
+                PIObs=form.PIAstro.data,
+                Obs=form.Observer.data,
+                starttime=form.start_time.data,
+                endtime=form.end_time.data
+            )
+            db.session.add(newlog)
+        else:
+            # Update the existing log
+            log.instrument = form.Instrument.data
+            log.PIObs = form.PIAstro.data
+            log.Obs = form.Observer.data
+            log.starttime = form.start_time.data
+            log.endtime = form.end_time.data
+        #do the same for Proglog
+        proglog = db.session.scalar(
+            sa.select(Proglog).where(Proglog.dateprog == dateprog)
+        )
+        if proglog is None:
+            newproglog = Proglog(
+                dateprog=dateprog,
+                progid =form.prog.data,
+                progloc=form.progrow.data,
+                progdtn=form.progdtn.data,
+                schedstart = None,
+                schedend = None,
+                weatherd=form.weatherdark.data,
+                weatherb=form.weatherbright.data,
+                equipd=form.equipmentdark.data,
+                equipb=form.equipmentbright.data,
+                obsd=form.obsdark.data,
+                obsb=form.obsbright.data,
+                notusedd=form.notuseddark.data,
+                notusedb=form.notusedbright.data,
+                note=form.notes.data
+            )
+            db.session.add(newproglog)
+        else:
+            # Update the existing proglog
+            proglog.progid = form.prog.data
+            proglog.progloc = form.progrow.data
+            proglog.progdtn = form.progdtn.data
+            proglog.weatherd = form.weatherdark.data
+            proglog.weatherb = form.weatherbright.data
+            proglog.equipd = form.equipmentdark.data
+            proglog.equipb = form.equipmentbright.data
+            proglog.obsd = form.obsdark.data
+            proglog.obsb = form.obsbright.data
+            proglog.notusedd = form.notuseddark.data
+            proglog.notusedb = form.notusedbright.data
+            proglog.note = form.notes.data
+            
+        db.session.commit()
+        flash('Log saved successfully!')
+        return redirect(url_for('currentlog'))
     return render_template('currentlog.html', title='Current Log', form=form)
 
 

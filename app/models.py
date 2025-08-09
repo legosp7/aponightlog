@@ -45,8 +45,8 @@ class Obslog(db.Model):
     obsdate: so.Mapped[date] = so.mapped_column(sa.Date)
     prog: so.Mapped[str] = so.mapped_column(sa.String(4))
     instrument: so.Mapped[str] = so.mapped_column(sa.String(20))
-    PIObs: so.Mapped[str] = so.mapped_column(sa.String(64))
-    Obs: so.Mapped[str] = so.mapped_column(sa.Text)
+    PIObs: so.Mapped[str] = so.mapped_column(sa.String(64), nullable=True)  # PI Astronomer
+    Obs: so.Mapped[str] = so.mapped_column(sa.Text, nullable=True)  # Observers, can be multiple
     starttime: so.Mapped[time] = so.mapped_column(sa.Time)
     endtime: so.Mapped[time] = so.mapped_column(sa.Time)
 
@@ -60,19 +60,19 @@ class Obslog(db.Model):
 class Proglog(db.Model):
     dateprog: so.Mapped[str] = so.mapped_column(sa.ForeignKey(Obslog.dateprog), primary_key=True, index=True, unique=True)
     progid: so.Mapped[str] = so.mapped_column(sa.String(4), index=True)
-    progloc: so.Mapped[str] = so.mapped_column(sa.String(1))
-    progdtn: so.Mapped[str] = so.mapped_column(sa.String(1))
+    progloc: so.Mapped[str] = so.mapped_column(sa.String(1),nullable=True) #actually row
+    progdtn: so.Mapped[str] = so.mapped_column(sa.String(1),nullable=True)
     schedstart: so.Mapped[time] = so.mapped_column(sa.Time)
     schedend: so.Mapped[time] = so.mapped_column(sa.Time)
-    weatherd: so.Mapped[float] = so.mapped_column(sa.Float)
-    weatherb: so.Mapped[float] = so.mapped_column(sa.Float)
-    equipd: so.Mapped[float] = so.mapped_column(sa.Float)
-    equipb: so.Mapped[float] = so.mapped_column(sa.Float)
-    obsd: so.Mapped[float] = so.mapped_column(sa.Float)
-    obsb: so.Mapped[float] = so.mapped_column(sa.Float)
-    notusedd: so.Mapped[float] = so.mapped_column(sa.Float)
-    notusedb: so.Mapped[float] = so.mapped_column(sa.Float)
-    note: so.Mapped[str] = so.mapped_column(sa.Text)
+    weatherd: so.Mapped[float] = so.mapped_column(sa.Float,nullable=True)
+    weatherb: so.Mapped[float] = so.mapped_column(sa.Float,nullable=True)
+    equipd: so.Mapped[float] = so.mapped_column(sa.Float,nullable=True)
+    equipb: so.Mapped[float] = so.mapped_column(sa.Float,nullable=True)
+    obsd: so.Mapped[float] = so.mapped_column(sa.Float,nullable=True)
+    obsb: so.Mapped[float] = so.mapped_column(sa.Float,nullable=True)
+    notusedd: so.Mapped[float] = so.mapped_column(sa.Float,nullable=True)
+    notusedb: so.Mapped[float] = so.mapped_column(sa.Float,nullable=True)
+    note: so.Mapped[str] = so.mapped_column(sa.Text,nullable=True)
     
     def __repr__(self) -> str:
         return f'<Proglog {self.dateprog}>'

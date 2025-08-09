@@ -3,7 +3,8 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, TimeF
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length
 import sqlalchemy as sa
 from app import db
-from app.models import User
+from app.models import User, Obslog
+from datetime import date
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -12,11 +13,9 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
     
 class CurrentLog(FlaskForm):
-    prog = SelectField('Program', choices=[
-        ('prog1', 'Program 1'),
-        ('prog2', 'Program 2'),
-        ('prog3', 'Program 3')
-    ], validators=[DataRequired()])
+    """Form for entering current observation log details."""
+    prog = SelectField('Program', coerce=str
+    , validators=[DataRequired()])
 
     PIAstro = StringField('PI Astronomer', validators=[DataRequired()])
     #PIAstro2 = StringField('PI Astro 2', validators=[DataRequired()])
@@ -47,6 +46,15 @@ class CurrentLog(FlaskForm):
     notes = TextAreaField('Notes', validators=[Length(max=1000)])  # Limit to 1000 characters
     submit = SubmitField('Save Log')
     
+    def get_today_progs(self):
+        """Fetch programs for today from the database."""
+        print("Fetching today's programs from the database...")
+        today = date.today()
+        # Assuming Proglog has a date field to filter by today's date
+        programs = db.session.query(Obslog).filter(Obslog.obsdate == today).all()
+        #return a list of programs from the programs query
+        return ([(prog.prog, prog.prog) for prog in programs])
+    
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -67,3 +75,5 @@ class RegistrationForm(FlaskForm):
         )
         if user is not None:
             raise ValidationError('Email already exists. Please choose a different one.')
+        
+    
