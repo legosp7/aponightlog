@@ -1,37 +1,284 @@
+{# templates/currentlog.html #}
 {% extends "base.html" %}
 
 {% block content %}
     <h1>Current Log</h1>
-    <form action="" method="post" novalidate>
+    <form action="" method="post" id="log-form" novalidate>
         {{ form.hidden_tag() }}
-        <p>
-            {{ form.prog.label }} {{ form.prog }}<br>
-        </p>
-        <p>
-            {{ form.PIAstro.label }}<br>
-            {{ form.PIAstro(size=32) }}
-        </p>
-        <p>
-            {{ form.Observer.label }}<br>
-            {{ form.Observer(size=32) }}
-        </p>
-        <p>
-            {{ form.Instrument.label }}<br>
-            {{ form.Instrument(size=32) }}
-        </p>
-        <p>
-            {{ form.start_time.label }} {{ form.start_time }}<br>
-        </p>
-        <p>
-            {{ form.end_time.label }} {{ form.end_time }}<br>
-        </p>
-        <p>{{ form.progrow.label }} {{ form.progrow }}</p>
-        <p>{{ form.progdtn.label }} {{ form.progdtn }}</p>
-        <p>{{ form.weatherdark.label }} {{ form.weatherdark }} {{ form.weatherbright.label }} {{ form.weatherbright }}</p>
-        <p>{{ form.equipmentdark.label }} {{ form.equipmentdark }} {{ form.equipmentbright.label }} {{ form.equipmentbright }}</p>
-        <p>{{ form.obsdark.label }} {{ form.obsdark }} {{ form.obsbright.label }} {{ form.obsbright }}</p>
-        <p>{{ form.notuseddark.label }} {{ form.notuseddark }} {{ form.notusedbright.label }} {{ form.notusedbright }}</p>
-        <p>{{ form.notes.label }}<br>{{ form.notes(cols="50",rows="10",id='larger')}}</p>
-        <p>{{ form.submit() }}</p>
-    </form>
+        <div class="group">
+            <label for="{{ form.prog.id }}">{{ form.prog.label.text }}</label>
+            {{ form.prog(id=form.prog.id) }}
+            {% for e in form.prog.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+          </div>
+      
+          <div id="fields">
+            <div class="group" data-name="PIAstro">
+              <label for="{{ form.PIAstro.id }}">{{ form.PIAstro.label.text }}</label>
+              {{ form.PIAstro() }}
+              {% for e in form.PIAstro.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="Observer">
+              <label for="{{ form.Observer.id }}">{{ form.Observer.label.text }}</label>
+              {{ form.Observer() }}
+              {% for e in form.Observer.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="Instrument">
+              <label for="{{ form.Instrument.id }}">{{ form.Instrument.label.text }}</label>
+              {{ form.Instrument() }}
+              {% for e in form.Instrument.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group two-col" data-name="start_time">
+              <label for="{{ form.start_time.id }}">{{ form.start_time.label.text }}</label>
+              {{ form.start_time(type="time") }}
+              {% for e in form.start_time.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group two-col" data-name="end_time">
+              <label for="{{ form.end_time.id }}">{{ form.end_time.label.text }}</label>
+              {{ form.end_time(type="time") }}
+              {% for e in form.end_time.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="progrow">
+              <label>{{ form.progrow.label.text }}</label>
+              {{ form.progrow() }}
+              {% for e in form.progrow.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="progdtn">
+              <label>{{ form.progdtn.label.text }}</label>
+              {{ form.progdtn() }}
+              {% for e in form.progdtn.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="weatherdark">
+              <label for="{{ form.weatherdark.id }}">{{ form.weatherdark.label.text }}</label>
+              {{ form.weatherdark(step="any") }}
+              {% for e in form.weatherdark.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="weatherbright">
+              <label for="{{ form.weatherbright.id }}">{{ form.weatherbright.label.text }}</label>
+              {{ form.weatherbright(step="any") }}
+              {% for e in form.weatherbright.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="equipmentdark">
+              <label for="{{ form.equipmentdark.id }}">{{ form.equipmentdark.label.text }}</label>
+              {{ form.equipmentdark(step="any") }}
+              {% for e in form.equipmentdark.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="equipmentbright">
+              <label for="{{ form.equipmentbright.id }}">{{ form.equipmentbright.label.text }}</label>
+              {{ form.equipmentbright(step="any") }}
+              {% for e in form.equipmentbright.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="obsdark">
+              <label for="{{ form.obsdark.id }}">{{ form.obsdark.label.text }}</label>
+              {{ form.obsdark(step="any") }}
+              {% for e in form.obsdark.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="obsbright">
+              <label for="{{ form.obsbright.id }}">{{ form.obsbright.label.text }}</label>
+              {{ form.obsbright(step="any") }}
+              {% for e in form.obsbright.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="notuseddark">
+              <label for="{{ form.notuseddark.id }}">{{ form.notuseddark.label.text }}</label>
+              {{ form.notuseddark(step="any") }}
+              {% for e in form.notuseddark.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="notusedbright">
+              <label for="{{ form.notusedbright.id }}">{{ form.notusedbright.label.text }}</label>
+              {{ form.notusedbright(step="any") }}
+              {% for e in form.notusedbright.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <div class="group" data-name="notes">
+              <label for="{{ form.notes.id }}">{{ form.notes.label.text }}</label>
+              {{ form.notes(rows=6) }}
+              {% for e in form.notes.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+      
+            <!--Fields for weather-->
+            <div class="group hidden" data-name="weatherfield">
+              <label for="{{ form.weatherfield.id }}">{{ form.weatherfield.label.text }}</label>
+              <p>{{ form.weatherfield(rows=20, cols = 60) }}</p>
+              {% for e in form.weatherfield.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="weathernote">
+                <label for="{{ form.weathernote.id }}">{{ form.weathernote.label.text }}</label>
+                <p>{{ form.weathernote(rows=20, cols=60) }}</p>
+                {% for e in form.weathernote.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <!-- Fields for Activity -->
+            <div class="group hidden" data-name="ObservingSpec">
+                <label for="{{ form.ObservingSpec.id }}">{{ form.ObservingSpec.label.text }}</label>
+                <p>{{ form.ObservingSpec() }}</p>
+                {% for e in form.ObservingSpec.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="activitynote">
+                <label for="{{ form.activitynote.id }}">{{ form.activitynote.label.text }}</label>
+                <p>{{ form.activitynote(rows=15,cols=40) }}</p>
+                {% for e in form.activitynote.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            
+            <!-- Fields for Focus Log-->
+            <div class="group hidden" data-name="focuslog">
+                <label for="{{ form.focuslog.id }}">{{ form.focuslog.label.text }}</label>
+                <p>{{ form.focuslog(rows=15,cols=40) }}</p>
+                {% for e in form.focuslog.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <!--Fields for Telescope Software-->
+            <div class="group hidden" data-name="tccversion">
+                <label for="{{ form.tccversion.id }}">{{ form.tccversion.label.text }}</label>
+                <p>{{ form.tccversion() }}</p>
+                {% for e in form.tccversion.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="hubversion">
+                <label for="{{ form.hubversion.id }}">{{ form.hubversion.label.text }}</label>
+                <p>{{ form.hubversion() }}</p>
+                {% for e in form.hubversion.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="tuiversion">
+                <label for="{{ form.tuiversion.id }}">{{ form.tuiversion.label.text }}</label>
+                <p>{{ form.tuiversion() }}</p>
+                {% for e in form.tuiversion.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+            
+            <!--Field for Failure Log-->
+            <div class="group hidden" data-name="progfail">
+                <label for="{{ form.progfail.id }}">{{ form.progfail.label.text }}</label>
+                <p>{{ form.progfail(rows=15,cols=40) }}</p>
+                {% for e in form.progfail.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="instrumentfail">
+                <label for="{{ form.instrumentfail.id }}">{{ form.instrumentfail.label.text }}</label>
+                <p>{{ form.instrumentfail(rows=15,cols=40) }}</p>
+                {% for e in form.instrumentfail.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="TI">
+                <label>{{ form.TI.label.text }}</label>
+                <p>{{ form.TI() }}</p>
+                {% for e in form.TI.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="SHU">
+                <label>{{ form.SHU.label.text }}</label>
+                <p>{{ form.SHU() }}</p>
+                {% for e in form.SHU.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="failstart">
+                <label>{{ form.failstart.label.text }}</label>
+                <p>{{ form.failstart(type="time") }}</p>
+                {% for e in form.failstart.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="failend">
+                <label>{{ form.failend.label.text }}</label>
+                <p>{{ form.failend() }}</p>
+                {% for e in form.failend.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="group hidden" data-name="failnote">
+                <label>{{ form.failnote.label.text }}</label>
+                <p>{{ form.failnote(rows=15, cols=40) }}</p>
+                {% for e in form.failnote.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+            </div>
+
+
+          </div>
+
+            
+      
+          {{ form.submit() }}
+        </form>
+      
+        <script>
+          const selectEl = document.getElementById("{{ form.prog.id }}");
+      
+          function setVisible(namesToShow) {
+            const allGroups = document.querySelectorAll("#fields [data-name]");
+            const showSet = new Set(namesToShow || []);
+            allGroups.forEach(g => {
+              const name = g.getAttribute("data-name");
+              g.classList.toggle("hidden", !showSet.has(name));
+              // toggle required attr for better UX (server still enforces in validate())
+              g.querySelectorAll("input, textarea, select").forEach(inp => {
+                if (showSet.has(name)) {
+                  inp.setAttribute("required", "required");
+                } else {
+                  inp.removeAttribute("required");
+                }
+              });
+            });
+          }
+      
+          function fill(values) {
+            if (!values) return;
+            // Map server keys => form field ids
+            const map = {
+              prog: "{{ form.prog.id }}",
+              PIAstro: "{{ form.PIAstro.id }}",
+              Observer: "{{ form.Observer.id }}",
+              Instrument: "{{ form.Instrument.id }}",
+              start_time: "{{ form.start_time.id }}",
+              end_time: "{{ form.end_time.id }}"
+            };
+      
+            for (const [k, v] of Object.entries(values)) {
+              const id = map[k];
+              if (!id) continue;
+              const el = document.getElementById(id);
+              if (!el) continue;
+              // Handle time inputs: expect "HH:MM[:SS]" or null
+              if (el.type === "time" && v) {
+                el.value = ("" + v).slice(0,5); // HH:MM
+              } else if (typeof v === "string" || typeof v === "number") {
+                el.value = v;
+              } else if (v == null) {
+                el.value = "";
+              }
+            }
+          }
+      
+          async function loadProgram(progVal) {
+            if (!progVal) {
+              setVisible([]); // hide all until selected
+              return;
+            }
+            try {
+              const r = await fetch(`/obslog/prefill/${encodeURIComponent(progVal)}`);
+              if (!r.ok) throw new Error("Network error");
+              const data = await r.json();
+              // Prefill values & show/hide based on rules supplied by server
+              fill(data.prefill);
+              setVisible(data.rules?.show || []);
+            } catch (e) {
+              console.error(e);
+            }
+          }
+      
+          // Init on page load (useful after a failed POST, keeps current selection)
+          loadProgram(selectEl.value);
+          selectEl.addEventListener("change", e => loadProgram(e.target.value));
+        </script>
 {% endblock %}

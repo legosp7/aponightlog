@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    p {
+        white-space: pre;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: medium;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: 0.5fr 1fr 1fr; 
+        gap: 0.25rem; 
+    }
+    
+    .element {
+        padding: 8px;
+    }
+
+    .header {
+        font-weight: bold;
+        border-bottom: 2px solid #333; 
+    }
+</style>
+<p style="text-align: center;">Apache Point Observatory</p>
+<p style="text-align: center;">3.5m Telescope Night Log</p>
+<p style="text-align: center;">{{ date }}</p>
+
+<div class="grid">
+    <div class="header">PROG</div>
+    <div class="header">PI Astronomer</div>
+    <div class="header">Observer(s)</div>
+    {% for program in obslogs %}
+        <div class="element">{{ program.prog }}</div>
+        <div class="element">{{ program.PIObs }}</div>
+        <div class="element">{{ program.Obs }}</div>
+    {% endfor %}
+</div>
+
+<div class="on sky">
+    <p style="text-align: center;">ON-SKY</p>
+
+</div>
+
+
+{% endblock %}

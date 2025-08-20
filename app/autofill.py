@@ -110,6 +110,8 @@ def fill_db():
 def sensor():
     """Function to run the sensor."""
     print("Sensor is running...")
+    
+fill_db()  # Initial fill of the database
 
 # sched = BackgroundScheduler(daemon=True)
 # sched.add_job(id='autofill',func=fill_db, trigger=CronTrigger(hour=16, minute=0, second=0, timezone='America/Denver'), replace_existing=True)
