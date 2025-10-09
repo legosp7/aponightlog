@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
+from flask_mail import Mail
 
 import psycopg2
 
@@ -14,15 +15,9 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+mail = Mail(app)
 
-# from sqlalchemy import create_engine
-# engine = create_engine('postgresql+psycopg2://span:12345@hostname/app')
-
-# import psycopg2
-# conn_string = "host='localhost' dbname='app' user='span' password='12345'"
-# conn = psycopg2.connect(conn_string)
-
-# Register the error handlers
+# Register the error handlers to email errors
 if not app.debug:
     if app.config['MAIL_SERVER']:
         auth = None

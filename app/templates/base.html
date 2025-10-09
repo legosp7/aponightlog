@@ -1,22 +1,15 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         {% if title %}
         <title>{{ title }} - Nightlog</title>
         {% else %}
         <title>Welcome to the 3.5 Nightlog Homepage!</title>
         {% endif %}
-        <style>
-            .hidden {
-                display: none;
-            }
-            .group {
-                margin-bottom: 1rem 0;
-                padding: .75rem;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-            }
-        </style>
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
     <body>
         <div>Nightlog: 

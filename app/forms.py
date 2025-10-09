@@ -38,11 +38,11 @@ class CurrentLog(FlaskForm):
     notes = TextAreaField('Notes', validators=[Length(max=1000), Optional()])  # Limit to 1000 characters
     
     #text fields for additional information
-    weatherfield = TextAreaField('Weather Conditions', validators=[Length(max=500), Optional()])  # Limit to 500 characters
+    weatherfield = TextAreaField('Weather Conditions', validators=[Length(max=5000), Optional()])  # Limit to 500 characters
     weathernote = TextAreaField('Weather Notes', validators=[Length(max=500), Optional()])  # Limit to 500 characters
     
     #fields for activity log
-    ObservingSpec = StringField('Observing Specialist', validators=[Length(max=1000), Optional()])  # Limit to 1000 characters
+    ObservingSpec = StringField('Observing Specialist', validators=[Length(max=5000), Optional()])  # Limit to 1000 characters
     activitynote = TextAreaField('Activity Notes', validators=[Length(max=500), Optional()])  # Limit to 500 characters
     
     #fields for failure log
@@ -106,5 +106,7 @@ class CurrentLog(FlaskForm):
                     fld.errors.append("Required for the selected program.")
         return not any_missing
     
-        
+class emailForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Email')
     

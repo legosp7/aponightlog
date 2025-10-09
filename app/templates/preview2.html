@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p style="text-align: center;">Apache Point Observatory</p>
+<p style="text-align: center;">3.5m Telescope Night Log</p>
+<p style="text-align: center;">{{ date }}</p>
+
+<div class="grid">
+    <div class="header">PROG</div>
+    <div class="header">PI Astronomer</div>
+    <div class="header">Observer(s)</div>
+    {% for program in obslogs %}
+        <div class="element">{{ program.prog }}</div>
+        <div class="element">{{ program.PIObs }}</div>
+        <div class="element">{{ program.Obs }}</div>
+    {% endfor %}
+</div>
+
+<div class="on sky">
+    <p style="text-align: center;">ON-SKY</p>
+    <div class = "gridonsky">
+        <div class="header">PROG</div>
+        <div class="header">INSTRUMENT</div>
+        <div class="header">START</div>
+        <div class="header">END</div>
+        {% for program in obslogs %}
+            <div class="element">{{ program.prog }}</div>
+            <div class="element">{{ program.instrument }}</div>
+            <div class="element">{{ program.starttime }}</div>
+            <div class="element">{{ program.endtime }}</div>
+        {% endfor %}
+
+    </div>
+</div>
+
+<div class="proginfo">
+    <div class = "gridproginfo">
+        <div class="header">PROG/ROW/DTN</div>
+        <div class="header">SCHED START</div>
+        <div class="header">SCHED END</div>
+        <div class="header">WEATHER D</div>
+        <div class="header">WEATHER B</div>
+        <div class="header">EQUIP D</div>
+        <div class="header">EQUIP B</div>
+        <div class="header">OBS D</div>
+        <div class="header">OBS B</div>
+        <div class="header">NOT USED D</div>
+        <div class="header">NOT USED B</div>
+        <div class="header">NOTES</div>
+
+        {% for program in proglogs %}
+            <div class="element">{{ program.progid }}/{{ program.progloc }}/{{ program.dtn }}</div>
+            <div class="element">{{ program.schedstart }}</div>
+            <div class="element">{{ program.schedend }}</div>
+            <div class="element">{{ program.weatherd }}</div>
+            <div class="element">{{ program.weatherb }}</div>
+            <div class="element">{{ program.equipd }}</div>
+            <div class="element">{{ program.equipb }}</div>
+            <div class="element">{{ program.obsd }}</div>
+            <div class="element">{{ program.obsb }}</div>
+            <div class="element">{{ program.notusedd }}</div>
+            <div class="element">{{ program.notusedb }}</div>
+            <div class="element">{{ program.note }}</div>
+        {% endfor %}
+
+        </div>
+    </div>
+
+    <div class="activity log">
+        <div class="activitylogheader">
+            <p>ACTIVITY LOG</p>
+        </div>
+        <div class="gridactivitylog">
+            <div class="element">Observing Specialist: {{ activity_log.ObservingSpec }} </div>
+            <div class="element">{{ activity_log.notes }} </div>
+        </div>
+        
+    </div>
+
+    <div class="failure log">
+        <p style="text-align: center;">FAILURE LOG</p>
+        <div class="gridfailure">
+            <div class="header">PROG</div>
+            <div class="header">INSTR</div>
+            <div class="header">FAIL TI</div>
+            <div class="header">FAIL SHU</div>
+            <div class="header">FAIL START</div>
+            <div class="header">FAIL END</div>
+            <div class="header">DESC</div>
+            {% for failure in failure_log %}
+                <div class="element">{{ failure.prog }}</div>
+                <div class="element">{{ failure.instrument }}</div>
+                <div class="element">{{ failure.TI }}</div>
+                <div class="element">{{ failure.SHU }}</div>
+                <div class="element">{{ failure.FAILSTART }}</div>
+                <div class="element">{{ failure.FAILEND }}</div>
+                <div class="element">{{ failure.FAILDESC }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="focus log">
+        <div class ="activitylogheader">
+            <p>FOCUS LOG</p>
+        </div>
+        <div class="gridactivitylog">
+            <div class="element">{{ focus_log.focustext }} </div>
+        </div>
+    </div>
+
+    <div class="weather log">
+        <div class ="activitylogheader">
+            <p>WEATHER LOG</p>
+        </div>
+        <div class="gridactivitylog">
+            <div class="element">{{ weather_log.weatherfield }} </div>
+            <div class="element">Note: {{ weather_log.weathernotes }} </div>
+        </div>
+    </div>
+
+    <div class="telescope info">
+        <div class ="activitylogheader">
+            <p>TELESCOPE SOFTWARE</p>
+        </div>
+        <div class="gridactivitylog">
+            <div class="element">Current TCC version: {{ telescope_software_log.tccversion }} </div>
+            <div class="element">Current HUB version: {{ telescope_software_log.hubversion }} </div>
+            <div class="element">Current TUI version: {{ telescope_software_log.tuiversion }} </div>
+
+        </div>
+    </div>
+
+    <div class="form">
+        <form action="" method = "post">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            <label for="{{ form.email.id }}">{{ form.email.label.text }}</label>
+            {{ form.email() }}
+        </div>
+
+        <p>{{ form.submit() }}</p>
+        </form>
+    </div>
+        
+
+    
+
+{% endblock %}

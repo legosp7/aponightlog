@@ -1,0 +1,81 @@
+.hidden {
+    display: none;
+}
+
+.group {
+    margin-bottom: 1rem 0;
+    padding: .75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+p {
+    white-space: pre;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: medium;
+}
+.grid {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr 1fr; 
+    gap: 0.25rem; 
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    margin-bottom: 2rem;
+
+}
+
+.gridonsky {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr 1fr 0.5fr; 
+    gap: 0.25rem; 
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    margin-bottom: 2rem;
+
+}
+
+.element {
+    padding: 8px;
+}
+
+.header {
+    font-weight: bold;
+    border-bottom: 2px solid #333; 
+}
+
+.gridproginfo{
+    display: grid;
+    grid-template-columns: 0.5fr 1fr 1fr 1fr 1fr 0.75fr 0.75fr 0.5fr 0.5fr 1fr 1fr 2fr;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.gridfailure{
+    display: grid;
+    grid-template-columns: 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 2fr;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.gridactivitylog{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.activitylogheader{
+    border-bottom: 2px solid #333;
+    text-align: center;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+
+
+

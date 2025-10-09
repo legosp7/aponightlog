@@ -164,7 +164,7 @@
             <!--Field for Failure Log-->
             <div class="group hidden" data-name="progfail">
                 <label for="{{ form.progfail.id }}">{{ form.progfail.label.text }}</label>
-                <p>{{ form.progfail(rows=15,cols=40) }}</p>
+                <p>{{ form.progfail(id = form.progfail.id) }}</p>
                 {% for e in form.progfail.errors %}<div class="errors">{{ e }}</div>{% endfor %}
             </div>
 
@@ -214,6 +214,7 @@
       
         <script>
           const selectEl = document.getElementById("{{ form.prog.id }}");
+          const progfailEl = document.getElementById("{{ form.progfail.id }}");
       
           function setVisible(namesToShow) {
             const allGroups = document.querySelectorAll("#fields [data-name]");
@@ -231,6 +232,18 @@
               });
             });
           }
+
+          function setRadio(name, value) {
+            const radios = document.querySelectorAll(`input[type="radio"][name="${name}"]`);
+            radios.forEach(r => {
+              r.checked = (String(r.value) === String(value));
+            });
+          }
+
+          function getRadio(name) {
+            const checked = document.querySelector(`input[type="radio"][name="${name}"]:checked`);
+            return checked ? checked.value : null;
+          }
       
           function fill(values) {
             if (!values) return;
@@ -241,10 +254,51 @@
               Observer: "{{ form.Observer.id }}",
               Instrument: "{{ form.Instrument.id }}",
               start_time: "{{ form.start_time.id }}",
-              end_time: "{{ form.end_time.id }}"
+              end_time: "{{ form.end_time.id }}",
+              weatherdark: "{{ form.weatherdark.id }}",
+              weatherbright: "{{ form.weatherbright.id }}",
+              equipmentdark: "{{ form.equipmentdark.id }}",
+              equipmentbright: "{{ form.equipmentbright.id }}",
+              obsdark: "{{ form.obsdark.id }}",
+              obsbright: "{{ form.obsbright.id }}",
+              notuseddark: "{{ form.notuseddark.id }}",
+              notusedbright: "{{ form.notusedbright.id }}",
+              progrow: "{{ form.progrow.id }}",
+              progdtn: "{{ form.progdtn.id }}",
+              notes: "{{ form.notes.id }}",
+              // Add more mappings as needed
+              //activity
+              ObservingSpec: "{{ form.ObservingSpec.id }}",
+              activitynote: "{{ form.activitynote.id }}",
+              //weather
+              weatherfield: "{{ form.weatherfield.id }}",
+              weathernote: "{{ form.weathernote.id }}",
+              //focuslog
+              focuslog: "{{ form.focuslog.id }}",
+              //telescope software
+              tccversion: "{{ form.tccversion.id }}",
+              hubversion: "{{ form.hubversion.id }}",
+              tuiversion: "{{ form.tuiversion.id }}",
+              //failure log
+              progfail: "{{ form.progfail.id }}",
+              instrumentfail: "{{ form.instrumentfail.id }}",
+              TI: "{{ form.TI.id }}",
+              SHU: "{{ form.SHU.id }}",
+              failstart: "{{ form.failstart.id }}",
+              failend: "{{ form.failend.id }}",
+              failnote: "{{ form.failnote.id }}",
+
             };
+
+
       
             for (const [k, v] of Object.entries(values)) {
+              if (k === "progrow" || k === "progdtn" || k === "TI" || k === "SHU") {
+                if (v != null && v != "") setRadio(k, v);{
+                  setRadio(k, v);
+                continue;
+                }
+              }
               const id = map[k];
               if (!id) continue;
               const el = document.getElementById(id);
@@ -272,13 +326,34 @@
               // Prefill values & show/hide based on rules supplied by server
               fill(data.prefill);
               setVisible(data.rules?.show || []);
+              if (progVal.toLowerCase() === "failure log" && progfailEl && progfailEl.value) { 
+                await loadFailure(progfailEl.value);
+              }
             } catch (e) {
               console.error(e);
             }
+          }
+
+          async function loadFailure(actualProg) {
+            try {
+              const r = await fetch(`/obslog/prefill_failure/${encodeURIComponent(actualProg)}`);
+              if (!r.ok) throw new Error("Network error");
+              const data = await r.json();
+              fill(data.prefill);
+              setVisible(data.rules?.show || []);
+            } catch (e) {
+              console.error(e);
+            }
+          }
+
+          if (progfailEl){
+            progfailEl.addEventListener("change", e => {loadFailure(e.target.value)});
           }
       
           // Init on page load (useful after a failed POST, keeps current selection)
           loadProgram(selectEl.value);
           selectEl.addEventListener("change", e => loadProgram(e.target.value));
+
+          
         </script>
 {% endblock %}

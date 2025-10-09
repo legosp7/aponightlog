@@ -1,14 +1,47 @@
 from sqlalchemy.exc import IntegrityError
 from app import app, db
 from flask import Blueprint,render_template, flash, redirect, url_for, request, jsonify
-from app.forms import CurrentLog
+from app.forms import CurrentLog, emailForm
 import sqlalchemy as sa
-from datetime import date
+from datetime import date, datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 #remove below
 from app.models import Obslog, Proglog, ActivityLog, FailureLog, WeatherLog, TelescopeSoftwareLog, FocusLog
 from urllib.parse import urlsplit
+from app.email import send_preview
 
+#change the today, otherwise will reset and not work past 12 am every day
+
+def hhmm(t):
+    if t is None:
+        return ''
+    return f"{t.hour:02d}:{t.minute:02d}"
+    
+def default_times():
+    now = datetime.now()
+    start = now.replace(second=0, microsecond=0)
+    end = (start + timedelta(hours=1))
+    return start.strftime("%H:%M"), end.strftime("%H:%M")
+    
+def prefill_failure(program):
+    today = date.today()
+    latest = db.session.query(FailureLog).filter(FailureLog.progdate == program + today.strftime("%y%m%d")).first()
+    return {
+        'prefill': {
+            'progfail': program,
+            'instrumentfail': (latest.instrument if latest else '') or '',
+            'TI': (latest.TI if latest else '') or '',
+            'SHU': (latest.SHU if latest else '') or '',
+            'failstart': (hhmm(latest.FAILSTART) if latest else default_times()[0]) or '',
+            'failend': (hhmm(latest.FAILEND) if latest else default_times()[1]) or '',
+            'failnote': (latest.FAILDISC if latest else '') or ''
+        },
+        "rules": {
+            "show": ["progfail", "instrumentfail", "TI", "SHU", "failstart", "failend", "failnote"],
+            "required_fields": ["progfail", "instrumentfail", "TI", "SHU", "failstart", "failend"]
+        }
+    }
+    
 def prefill(program):
         '''get the program rules from the database and set the form fields accordingly'''
         today = date.today()
@@ -65,34 +98,44 @@ def prefill(program):
                 }
             }
             
-        if program == 'Failure Log':
-            latest = db.session.query(FailureLog).filter(FailureLog.progdate == program + today.strftime("%y%m%d")).first()
-            return {
-                'prefill': {
-                    'instrumentfail': (latest.instrument if latest else '') or '',
-                    'TI': (latest.TI if latest else '') or '',
-                    'SHU': (latest.SHU if latest else '') or '',
-                    'failstart': (latest.FAILSTART if latest else None),
-                    'failend': (latest.FAILEND if latest else None),
-                    'failnote': (latest.FAILDISC if latest else '') or ''
-                },
-                "rules": {
-                    "show": ["progfail", "instrumentfail", "TI", "SHU", "failstart", "failend", "failnote"],
-                    "required_fields": ["progfail", "instrumentfail", "TI", "SHU", "failstart", "failend"]
-                }
-            }
+        # if program == 'Failure Log':
+        #     latest = db.session.query(FailureLog).filter(FailureLog.progdate == program + today.strftime("%y%m%d")).first()
+        #     return {
+        #         'prefill': {
+        #             'instrumentfail': (latest.instrument if latest else '') or '',
+        #             'TI': (latest.TI if latest else '') or '',
+        #             'SHU': (latest.SHU if latest else '') or '',
+        #             'failstart': (hhmm(latest.FAILSTART) if latest else default_times()[0]) or '',
+        #             'failend': (hhmm(latest.FAILEND) if latest else default_times()[1]) or '',
+        #             'failnote': (latest.FAILDISC if latest else '') or ''
+        #         },
+        #         "rules": {
+        #             "show": ["progfail", "instrumentfail", "TI", "SHU", "failstart", "failend", "failnote"],
+        #             "required_fields": ["progfail", "instrumentfail", "TI", "SHU", "failstart", "failend"]
+        #         }
+        #     }
             
         latest = db.session.query(Obslog).filter(Obslog.prog == program,Obslog.obsdate==today).first()
-        
-        
+        latestprog = db.session.query(Proglog).filter(Proglog.progid == program, Proglog.dateprog.like('%'+today.strftime("%y%m%d"))).first()
         
         data = {
             'prog': program,
             'PIAstro': (latest.PIObs if latest else '') or '',
             'Observer': (latest.Obs if latest else '') or '',
             'Instrument': (latest.instrument if latest else '') or '',
-            'start_time': None,
-            'end_time': None,
+            'start_time': (hhmm(latest.starttime) if latest else default_times()[0]) or '',
+            'end_time': (hhmm(latest.endtime) if latest else default_times()[1]) or '',
+            'progrow': (latestprog.progloc if latest else '') or '',
+            'progdtn': (latestprog.progdtn if latest else '') or '',
+            'weatherdark': (latestprog.weatherd if latest else '') or '',
+            'weatherbright': (latestprog.weatherb if latest else '') or '',
+            'equipmentdark': (latestprog.equipd if latest else '') or '',
+            'equipmentbright': (latestprog.equipb if latest else '') or '',
+            'obsdark': (latestprog.obsd if latest else '') or '',
+            'obsbright': (latestprog.obsb if latest else '') or '',
+            'notuseddark': (latestprog.notusedd if latest else '') or '',
+            'notusedbright': (latestprog.notusedb if latest else '') or '',
+            'notes': (latestprog.note if latest else '') or '' 
         }
         
         #rules
@@ -113,24 +156,25 @@ def home():
 def prevlogs():
     return render_template('prevlogs.html', title='Previous Logs')
 
-@app.route('/preview')
+@app.route('/preview', methods=['GET', 'POST'])
 def preview():
-    #grab the obslogs for today
+    '''renders the preview page with today's log'''
+    #grab the logs
     today = date.today()
     obslogs = db.session.query(Obslog).filter(Obslog.obsdate == today).all()
-    #grab the proglogs for today
-    proglogs = db.session.query(Proglog).filter(Proglog.dateprog.like(today.strftime("%y%m%d") + '%')).all()
-    #grab the activity log for today
+    proglogs = db.session.query(Proglog).filter(Proglog.dateprog.like('%'+today.strftime("%y%m%d"))).all()
     activity_log = db.session.query(ActivityLog).filter(ActivityLog.activitydate == today).first()
-    #grab the failure logs for today
     failure_log = db.session.query(FailureLog).filter(FailureLog.failuredate == today).all()
-    #grab the weather log for today
     weather_log = db.session.query(WeatherLog).filter(WeatherLog.weatherdate == today).first()
-    #grab the focus log for today
     focus_log = db.session.query(FocusLog).filter(FocusLog.focusdate == today).first()
-    #grab the telescope software log for today
     telescope_software_log = db.session.query(TelescopeSoftwareLog).filter(TelescopeSoftwareLog.telescopemodeldate == today).first()
-    
+    form=emailForm()
+    if form.validate_on_submit():
+        print("Sending preview to %s" % form.email.data)
+        flash('Preview sent to %s' % form.email.data)
+        send_preview(form.email.data)
+    else:
+        print(form.email.data)
     return render_template('preview.html', title='Preview', 
                            date = date.today().strftime("%A, %B %d, %Y"),
                            obslogs=obslogs,
@@ -139,7 +183,8 @@ def preview():
                            failure_log=failure_log,
                            weather_log=weather_log,
                            focus_log=focus_log,
-                           telescope_software_log=telescope_software_log)
+                           telescope_software_log=telescope_software_log,
+                           form=form)
 
 
 @app.route('/currentlog', methods=['GET', 'POST'])
@@ -149,16 +194,25 @@ def currentlog():
                                                   ('Failure Log','Failure Log'),('Focus Log','Focus Log'),
                                                   ('Weather','Weather'),('Telescope Software','Telescope Software')] # Populate the program choices from the database
     form.progfail.choices = form.get_today_progs()  # Populate the program choices for failure log
-    if request.method == "POST" and form.prog.data:
+    
+    
+    print(form.prog.data)
+    if request.method == "POST" and form.prog.data != "Failure Log":
         info = prefill(form.prog.data)  # Get the program info based on the selected program
         if info:
             form._program_rules = info["rules"]
+            
+    elif request.method == "POST" and form.prog.data == "Failure Log":
+        info = prefill_failure(form.progfail.data)
+        if info:
+            form._program_rules = info["rules"]
+    
             
     if form.validate_on_submit():
         
         today = date.today().strftime("%y%m%d")  # Get today's date in YYMMDD format
         dateprog = form.prog.data + today
-        
+        print(form.prog.data)
         
         # activity log
         if form.prog.data == 'Activity':
@@ -177,16 +231,15 @@ def currentlog():
                 db.session.rollback()
                 flash('Log for today already exists. Please check the date and program.')
             flash('Log saved successfully!')
-            return redirect(url_for('currentlog'))
 
         #failure log
-        if form.prog.data == 'Failure Log':
+        elif form.prog.data == 'Failure Log':
             failureprogdate = form.progfail.data + today
             failure_log = db.session.scalar(
                 sa.select(FailureLog).where(FailureLog.progdate == failureprogdate)
             )
             if failure_log is None:
-                failure_log = FailureLog(progdate=failureprogdate, progfail=form.progfail.data, failuredate=date.today())
+                failure_log = FailureLog(progdate=failureprogdate, prog=form.progfail.data, failuredate=date.today())
                 db.session.add(failure_log)
             failure_log.instrument = form.instrumentfail.data
             failure_log.TI = form.TI.data
@@ -201,9 +254,8 @@ def currentlog():
                 db.session.rollback()
                 flash('Log for today already exists. Please check the date and program.')
             flash('Log saved successfully!')
-            return redirect(url_for('currentlog'))
             
-        if form.prog.data == 'Weather':
+        elif form.prog.data == 'Weather':
             weather_log = db.session.scalar(
                 sa.select(WeatherLog).where(WeatherLog.weatherdate == date.today())
             )
@@ -219,9 +271,8 @@ def currentlog():
                 db.session.rollback()
                 flash('Log for today already exists. Please check the date and program.')
             flash('Log saved successfully!')
-            return redirect(url_for('currentlog'))
             
-        if form.prog.data == 'Focus Log':
+        elif form.prog.data == 'Focus Log':
             focus_log = db.session.scalar(
                 sa.select(FocusLog).where(FocusLog.focusdate == date.today())
             )
@@ -236,14 +287,13 @@ def currentlog():
                 db.session.rollback()
                 flash('Log for today already exists. Please check the date and program.')
             flash('Log saved successfully!')
-            return redirect(url_for('currentlog'))
         
-        if form.prog.data == 'Telescope Software':
+        elif form.prog.data == 'Telescope Software':
             telescope_software_log = db.session.scalar(
                 sa.select(TelescopeSoftwareLog).where(TelescopeSoftwareLog.telescopemodeldate == date.today()
             ))
             if telescope_software_log is None:
-                telescope_software_log = TelescopeSoftwareLog(dateprog=dateprog)
+                telescope_software_log = TelescopeSoftwareLog(telescopemodeldate=date.today())
                 db.session.add(telescope_software_log)
             telescope_software_log.tccversion = form.tccversion.data
             telescope_software_log.hubversion = form.hubversion.data
@@ -255,7 +305,6 @@ def currentlog():
                 db.session.rollback()
                 flash('Log for today already exists. Please check the date and program.')
             flash('Log saved successfully!')
-            return redirect(url_for('currentlog'))
         
         else:
             log = db.session.scalar(
@@ -305,7 +354,7 @@ def currentlog():
                 db.session.rollback()
                 flash('Log for today already exists. Please check the date and program.')
             flash('Log saved successfully!')
-            return redirect(url_for('currentlog'))
+            
     return render_template('currentlog.html', title='Current Log', form=form)
 
 @app.get("/obslog/prefill/<string:prog_value>")
@@ -315,3 +364,10 @@ def obslog_prefill(prog_value):
         return jsonify({"prefill": {}, "rules": {"show": [], "required_fields": []}}), 404
     return jsonify(prefill(prog_value))
     
+@app.get("/obslog/prefill_failure/<string:prog_value>")
+def obslog_prefill_failure(prog_value):
+    valid_values = [prog for prog, _ in CurrentLog().get_today_progs()]
+    if prog_value not in valid_values:
+        return jsonify({"prefill": {}, "rules": {"show": [], "required_fields": []}}), 404
+    data = prefill_failure(prog_value)
+    return jsonify(prefill_failure(prog_value))

@@ -10,7 +10,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 INSTRUMENTS = {'A': 'APOLLO', 'E': 'Echelle', 'EK': 'EK', 'EKR': 'EKR', 'K':'KOSMOS',
-               'K(D)':'K(D)', 'K(R)':'K(R)', 'N':'NIC-FPS','R':'ARCTIC','R(K)':'R(K)',
+               'K(D)':'K(D)', 'KE': 'KE', 'K(R)':'K(R)', 'KR':'KR', 'N':'NIC-FPS','R':'ARCTIC','R(K)':'R(K)',
                'T':'TripleSpec', 'V':'VS', 'X':'X',}
 
 
@@ -21,7 +21,7 @@ def web_crawl_and_fill():
     date_str = today.strftime('%Y-%m-%d')
     #date_str = '2025-08-01'
     #construct the URL
-    url = f'http://35m-schedule.apo.nmsu.edu/2025-08-01.1/html/days/{date_str}.html'
+    url = f'http://35m-schedule.apo.nmsu.edu/2025-09-18.1/html/days/{date_str}.html'
     page = urlopen(url)
     htmlbites = page.read().decode('utf-8')
     tree = html.fromstring(htmlbites)
@@ -66,7 +66,7 @@ def fill_db():
                 if row[5] in INSTRUMENTS:
                     instrument_mapping = INSTRUMENTS[row[5]]
                 else:
-                    instrument_mapping = None
+                    instrument_mapping = row[5]
                 if log is None:
                     #create a new log
                     newlog = Obslog(
@@ -108,10 +108,11 @@ def fill_db():
             
 
 def sensor():
-    """Function to run the sensor."""
+    """Test function to run the sensor."""
     print("Sensor is running...")
     
-fill_db()  # Initial fill of the database
+#when testing, using below. for production, uncomment the scheduler instead
+#fill_db()  # Initial fill of the database
 
 # sched = BackgroundScheduler(daemon=True)
 # sched.add_job(id='autofill',func=fill_db, trigger=CronTrigger(hour=16, minute=0, second=0, timezone='America/Denver'), replace_existing=True)

@@ -56,7 +56,7 @@ class FailureLog(db.Model):
     progdate: so.Mapped[str] = so.mapped_column(sa.String(12), primary_key=True, unique=True)
     failuredate: so.Mapped[date] = so.mapped_column(sa.Date, index=True)  # Date of the failure log
     prog: so.Mapped[str] = so.mapped_column(sa.String(4), index=True)
-    instrument: so.Mapped[str] = so.mapped_column(sa.String(20))
+    instrument: so.Mapped[str] = so.mapped_column(sa.String(20), nullable=True)  # Instrument involved in the failure
     TI: so.Mapped[str] = so.mapped_column(sa.String(1), nullable=True)  # Telescope Instrument failure
     SHU: so.Mapped[str] = so.mapped_column(sa.String(1), nullable=True)  # SHU failure
     FAILSTART: so.Mapped[time] = so.mapped_column(sa.Time, nullable=True)  # Start time of failure

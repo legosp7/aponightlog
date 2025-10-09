@@ -1,6 +1,10 @@
-{% extends "base.html" %}
-
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Night Log</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+</head>
 <body>
     <div class="text-center">
         <p style="text-align: center">Apache Point Observatory</p>
@@ -154,21 +158,6 @@
     <p style="text-align: left; margin-left: 2rem; font-size: large"><span style="font-weight: bold;">Current HUB version: </span>{{ telescope_software_log.hubversion }}</p>
     <p style="text-align: left; margin-left: 2rem; font-size: large"><span style="font-weight: bold;">Current TUI version: </span>{{ telescope_software_log.tuiversion }}</p>
 
-
-    <div class="form">
-        <form action="" method = "post">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            <label for="{{ form.email.id }}">{{ form.email.label.text }}</label>
-            {{ form.email() }}
-        </div>
-    
-        <p>{{ form.submit() }}</p>
-        </form>
-    </div>
-
 </body>
-{% endblock %}
-
 
 
