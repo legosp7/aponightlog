@@ -21,7 +21,7 @@ def web_crawl_and_fill():
     date_str = today.strftime('%Y-%m-%d')
     #date_str = '2025-08-01'
     #construct the URL
-    url = f'http://35m-schedule.apo.nmsu.edu/2025-09-18.1/html/days/{date_str}.html'
+    url = f'http://35m-schedule.apo.nmsu.edu/2025-10-04.1/html/days/{date_str}.html'
     page = urlopen(url)
     htmlbites = page.read().decode('utf-8')
     tree = html.fromstring(htmlbites)

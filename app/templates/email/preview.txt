@@ -1,5 +1,2 @@
-                      Apache Point Observatory
-                      3.5m Telescope Night Log
-                      {{ date }}
 
 

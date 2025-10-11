@@ -1,148 +1,172 @@
 {% extends "base.html" %}
 
 {% block content %}
-<p style="text-align: center;">Apache Point Observatory</p>
-<p style="text-align: center;">3.5m Telescope Night Log</p>
-<p style="text-align: center;">{{ date }}</p>
-
-<div class="grid">
-    <div class="header">PROG</div>
-    <div class="header">PI Astronomer</div>
-    <div class="header">Observer(s)</div>
-    {% for program in obslogs %}
-        <div class="element">{{ program.prog }}</div>
-        <div class="element">{{ program.PIObs }}</div>
-        <div class="element">{{ program.Obs }}</div>
-    {% endfor %}
+<div class="text-center">
+    <p style="text-align: center">Apache Point Observatory</p>
+    <p style="text-align: center">3.5m Telescope Night Log</p>
+    <p style="text-align: center">{{ date }}</p>
 </div>
 
-<div class="on sky">
-    <p style="text-align: center;">ON-SKY</p>
-    <div class = "gridonsky">
-        <div class="header">PROG</div>
-        <div class="header">INSTRUMENT</div>
-        <div class="header">START</div>
-        <div class="header">END</div>
+<table id="data" class="table table-striped">
+    <thead>
+        <tr>
+            <th style="text-align: center">PROG</th>
+            <th style="text-align: center">PI Obs</th>
+            <th style="text-align: center">Obs</th>
+        </tr>
+    </thead>
+    <tbody>
         {% for program in obslogs %}
-            <div class="element">{{ program.prog }}</div>
-            <div class="element">{{ program.instrument }}</div>
-            <div class="element">{{ program.starttime }}</div>
-            <div class="element">{{ program.endtime }}</div>
+        <tr>
+            <td style="text-align: center">{{ program.prog }}</td>
+            <td style="text-align: center">{{ program.PIObs }}</td>
+            <td style="text-align: center">{{ program.Obs }}</td>
+        </tr>
         {% endfor %}
+    </tbody>
+</table>
 
-    </div>
+<div class="text-center">
+    <h4>ON-SKY</h4>
 </div>
 
-<div class="proginfo">
-    <div class = "gridproginfo">
-        <div class="header">PROG/ROW/DTN</div>
-        <div class="header">SCHED START</div>
-        <div class="header">SCHED END</div>
-        <div class="header">WEATHER D</div>
-        <div class="header">WEATHER B</div>
-        <div class="header">EQUIP D</div>
-        <div class="header">EQUIP B</div>
-        <div class="header">OBS D</div>
-        <div class="header">OBS B</div>
-        <div class="header">NOT USED D</div>
-        <div class="header">NOT USED B</div>
-        <div class="header">NOTES</div>
-
-        {% for program in proglogs %}
-            <div class="element">{{ program.progid }}/{{ program.progloc }}/{{ program.dtn }}</div>
-            <div class="element">{{ program.schedstart }}</div>
-            <div class="element">{{ program.schedend }}</div>
-            <div class="element">{{ program.weatherd }}</div>
-            <div class="element">{{ program.weatherb }}</div>
-            <div class="element">{{ program.equipd }}</div>
-            <div class="element">{{ program.equipb }}</div>
-            <div class="element">{{ program.obsd }}</div>
-            <div class="element">{{ program.obsb }}</div>
-            <div class="element">{{ program.notusedd }}</div>
-            <div class="element">{{ program.notusedb }}</div>
-            <div class="element">{{ program.note }}</div>
+<table id="onsky" class="table table-striped">
+    <thead>
+        <tr>
+            <th style="text-align: center">PROG</th>
+            <th style="text-align: center">INSTRUMENT</th>
+            <th style="text-align: center">START</th>
+            <th style="text-align: center">END</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for program in obslogs %}
+        <tr>
+            <td style="text-align: center">{{ program.prog }}</td>
+            <td style="text-align: center">{{ program.instrument }}</td>
+            <td style="text-align: center">{{ program.starttime }}</td>
+            <td style="text-align: center">{{ program.endtime }}</td>
+        </tr>
         {% endfor %}
+    </tbody>
+</table>
 
-        </div>
+<table id="proginfo" class="table table-striped">
+    <thead>
+        <tr>
+            <th style="text-align: center;">Prog</th>
+            <th colspan="2" style="text-align: center;">Scheduled</th>
+            <th colspan="2" style="text-align: center;">Weather</th>
+            <th colspan="2" style="text-align: center;">Equipment</th>
+            <th colspan="2" style="text-align: center;">Obs</th>
+            <th colspan="2" style="text-align: center;">Not Used</th>
+        </tr>
+        <tr>
+            <th style="text-align: center;">I/ROW/DTN</th>
+            <th style="text-align: center;">START</th>
+            <th style="text-align: center;">FINISH</th>
+            <th style="text-align: center;">D</th>
+            <th style="text-align: center;">B</th>
+            <th style="text-align: center;">D</th>
+            <th style="text-align: center;">B</th>
+            <th style="text-align: center;">D</th>
+            <th style="text-align: center;">B</th>
+            <th style="text-align: center;">D</th>
+            <th style="text-align: center;">B</th>
+        </tr>
+    <tbody>
+    <tr>
+        {% for program in proglogs %}
+        <td style="text-align: center;">{{ program.progid }}/{{ program.progloc }}/{{ program.dtn }}</td>
+        <td style="text-align: center;">{{ program.schedstart }}</td>
+        <td style="text-align: center;">{{ program.schedend }}</td>
+        <td style="text-align: center;">{{ program.weatherd }}</td>
+        <td style="text-align: center;">{{ program.weatherb }}</td>
+        <td style="text-align: center;">{{ program.equipd }}</td>
+        <td style="text-align: center;">{{ program.equipb }}</td>
+        <td style="text-align: center;">{{ program.obsd }}</td>
+        <td style="text-align: center;">{{ program.obsb }}</td>
+        <td style="text-align: center;">{{ program.notusedd }}</td>
+        <td style="text-align: center;">{{ program.notusedb }}</td>
+        {% endfor %}
+    </tr>
+    </tbody>
+</table>
+
+<div>
+    <h4 style="text-align: center;">ACTIVITY LOG</h4>
+    <p style="font-size: large"><span style="text-align: left; margin-left: 2rem; font-weight: bold;">Observing Specialist: </span>{{ activity_log.ObservingSpec }}</p>
+    <p style="text-align: left; margin-left: 2rem; font-size: large">{{ activity_log.notes }}</p>
+</div>
+
+<div class="text-center">
+    <h4>FAILURE LOG</h4>
+</div>
+
+<table id="failurelog" class="table table-striped">
+    <thead>
+        <tr>
+            <th style="text-align: center"></th>
+            <th style="text-align: center"></th>
+            <th style="text-align: center">FAILURE MODE</th>
+            <th colspan="2" style="text-align: center">TIME</th>
+            <th style="text-align: center"></th>
+        </tr>
+        <tr>
+            <th style="text-align: center;">PROG</th>
+            <th style="text-align: center;">INSTR</th>
+            <th style="text-align: center;">TI/SHU</th>
+            <th style="text-align: center;">START</th>
+            <th style="text-align: center;">FINISH</th>
+            <th style="text-align: center;">DESCRIPTION</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for failure in failure_log %}
+        <tr>
+            <td style="text-align: center">{{ failure.prog}}</td>
+            <td style="text-align: center">{{ failure.instrument }}</td>
+            <td style="text-align: center">{{ failure.TI }}/{{ failure.SHU }}</td>
+            <td style="text-align: center">{{ failure.FAILSTART }}</td>
+            <td style="text-align: center">{{ failure.FAILEND }}</td>
+            <td style="text-align: center">{{ failure.FAILDISC }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="text-center">
+    <h4>FOCUS LOG</h4>
+</div>
+<p style="text-align: center; font-size: large">{{ focus_log.focustext }}</p>
+
+<div class="text-center">
+    <h4>WEATHER LOG</h4>
+</div>
+<p style="text-align: center; font-size: large">{{ weather_log.weatherfield }}</p>
+<p style="text-align: center; font-size: large">Note: {{ weather_log.weathernotes }}</p>
+
+<div class="text-center">
+    <h4>TELESCOPE SOFTWARE</h4>
+</div>
+<p style="text-align: left; margin-left: 2rem; font-size: large"><span style="font-weight: bold;">Current TCC version: </span>{{ telescope_software_log.tccversion }}</p>
+<p style="text-align: left; margin-left: 2rem; font-size: large"><span style="font-weight: bold;">Current HUB version: </span>{{ telescope_software_log.hubversion }}</p>
+<p style="text-align: left; margin-left: 2rem; font-size: large"><span style="font-weight: bold;">Current TUI version: </span>{{ telescope_software_log.tuiversion }}</p>
+
+
+<div class="form">
+    <form action="" method = "post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="{{ form.email.id }}">{{ form.email.label.text }}</label>
+        {{ form.email() }}
     </div>
 
-    <div class="activity log">
-        <div class="activitylogheader">
-            <p>ACTIVITY LOG</p>
-        </div>
-        <div class="gridactivitylog">
-            <div class="element">Observing Specialist: {{ activity_log.ObservingSpec }} </div>
-            <div class="element">{{ activity_log.notes }} </div>
-        </div>
-        
-    </div>
-
-    <div class="failure log">
-        <p style="text-align: center;">FAILURE LOG</p>
-        <div class="gridfailure">
-            <div class="header">PROG</div>
-            <div class="header">INSTR</div>
-            <div class="header">FAIL TI</div>
-            <div class="header">FAIL SHU</div>
-            <div class="header">FAIL START</div>
-            <div class="header">FAIL END</div>
-            <div class="header">DESC</div>
-            {% for failure in failure_log %}
-                <div class="element">{{ failure.prog }}</div>
-                <div class="element">{{ failure.instrument }}</div>
-                <div class="element">{{ failure.TI }}</div>
-                <div class="element">{{ failure.SHU }}</div>
-                <div class="element">{{ failure.FAILSTART }}</div>
-                <div class="element">{{ failure.FAILEND }}</div>
-                <div class="element">{{ failure.FAILDESC }}</div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="focus log">
-        <div class ="activitylogheader">
-            <p>FOCUS LOG</p>
-        </div>
-        <div class="gridactivitylog">
-            <div class="element">{{ focus_log.focustext }} </div>
-        </div>
-    </div>
-
-    <div class="weather log">
-        <div class ="activitylogheader">
-            <p>WEATHER LOG</p>
-        </div>
-        <div class="gridactivitylog">
-            <div class="element">{{ weather_log.weatherfield }} </div>
-            <div class="element">Note: {{ weather_log.weathernotes }} </div>
-        </div>
-    </div>
-
-    <div class="telescope info">
-        <div class ="activitylogheader">
-            <p>TELESCOPE SOFTWARE</p>
-        </div>
-        <div class="gridactivitylog">
-            <div class="element">Current TCC version: {{ telescope_software_log.tccversion }} </div>
-            <div class="element">Current HUB version: {{ telescope_software_log.hubversion }} </div>
-            <div class="element">Current TUI version: {{ telescope_software_log.tuiversion }} </div>
-
-        </div>
-    </div>
-
-    <div class="form">
-        <form action="" method = "post">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            <label for="{{ form.email.id }}">{{ form.email.label.text }}</label>
-            {{ form.email() }}
-        </div>
-
-        <p>{{ form.submit() }}</p>
-        </form>
-    </div>
-        
-
-    
+    <p>{{ form.submit() }}</p>
+    </form>
+</div>
 
 {% endblock %}
+
+
+
