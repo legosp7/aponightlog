@@ -56,6 +56,23 @@
         <span style="display: inline-block; width: 5rem">{{ failure.prog }}</span><span style="display: inline-block; width: 5rem">{{ failure.instrument }}</span><span style="display: inline-block; width: 5rem">{{ failure.TI }}/{{ failure.SHU }}</span><span style="display: inline-block; width: 5rem">{{ failure.FAILSTART }}</span><span style="display: inline-block; width: 5rem">{{ failure.FAILEND }}</span><span style="display: inline-block; width: 20rem">{{ failure.FAILDISC }}</span><br>
         {% endfor %}
     </div>
+
+    <div style="margin-left: 1rem; line-height: 1;">
+        <span style="width: 6rem">---------------- FOCUS LOG ---------------</span><br>
+        <span style="display: inline-block;">{{ focus_log.focustext }}</span><br>
+    </div>
+
+    <div style="margin-left: 1rem; line-height: 1;">
+        <span style="width: 6rem">------------- WEATHER LOG ----------------</span><br>
+        <span style="display: inline-block;">{{ weather_log.weatherfield }}</span><br>
+        <span style="display: inline-block;"><p>Notes: {{ weather_log.notes }}</p></span>
+    </div>
+
+    <div style="margin-left: 1rem; line-height: 1;">
+        <span style="width: 6rem">----------  TELESCOPE SOFTWARE  ----------</span><br>
+        Current TCC Version: {{ telescope_software_log.tccversion }}<br>
+        Current HUB Version: {{ telescope_software_log.hubversion }}<br>
+        Current TUI Version: {{ telescope_software_log.tuiversion }}<br>
 </body>
 
 
