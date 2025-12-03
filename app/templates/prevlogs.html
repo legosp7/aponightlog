@@ -2,4 +2,50 @@
 
 {% block content %}
     <h1>Welcome to the Nightlog Homepage!</h1>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th scope="col">DATE</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in dates %}
+                <tr>
+                    <td class = "text center">
+                        <a href="{{ url_for('viewlog', date=log[0].strftime('%Y-%m-%d')) }}">
+                        {{log[0].strftime('%Y-%m-%d')}}
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!--Pagination-->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {# Previous button #}
+            <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ page-1 }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            {# Page numbers #}
+            {% for p in range(1,total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+
+            {# Next button #}
+            <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ page + 1 }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
 {% endblock %}

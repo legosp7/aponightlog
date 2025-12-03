@@ -21,7 +21,7 @@ def web_crawl_and_fill():
     date_str = today.strftime('%Y-%m-%d')
     #date_str = '2025-08-01'
     #construct the URL
-    url = f'http://35m-schedule.apo.nmsu.edu/2025-10-04.1/html/days/{date_str}.html'
+    url = f'http://35m-schedule.apo.nmsu.edu/2025-11-21.3/html/days/{date_str}.html'
     page = urlopen(url)
     htmlbites = page.read().decode('utf-8')
     tree = html.fromstring(htmlbites)
@@ -114,6 +114,7 @@ def sensor():
 #when testing, using below. for production, uncomment the scheduler instead
 #fill_db()  # Initial fill of the database
 
+#below is the normal autofill, it runs every day at 4pm MST
 # sched = BackgroundScheduler(daemon=True)
 # sched.add_job(id='autofill',func=fill_db, trigger=CronTrigger(hour=16, minute=0, second=0, timezone='America/Denver'), replace_existing=True)
 # sched.start()

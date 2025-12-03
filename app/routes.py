@@ -1,4 +1,5 @@
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import func
 from app import app, db
 from flask import Blueprint,render_template, flash, redirect, url_for, request, jsonify
 from app.forms import CurrentLog, emailForm
@@ -9,6 +10,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from app.models import Obslog, Proglog, ActivityLog, FailureLog, WeatherLog, TelescopeSoftwareLog, FocusLog
 from urllib.parse import urlsplit
 from app.email import send_preview
+import math
 
 #change the today, otherwise will reset and not work past 12 am every day
 
@@ -152,9 +154,42 @@ def prefill(program):
 def home():
     return render_template('home.html', title='Home')
 
+@app.route('/viewlog/<string:date>')
+def viewlog(date):
+    obslogs = db.session.query(Obslog).filter(Obslog.obsdate == date).all()
+    proglogs = db.session.query(Proglog).filter(Proglog.dateprog.like('%'+date)).all()
+    activity_log = db.session.query(ActivityLog).filter(ActivityLog.activitydate == date).first()
+    failure_log = db.session.query(FailureLog).filter(FailureLog.failuredate == date).all()
+    weather_log = db.session.query(WeatherLog).filter(WeatherLog.weatherdate == date).first()
+    focus_log = db.session.query(FocusLog).filter(FocusLog.focusdate == date).first()
+    telescope_software_log = db.session.query(TelescopeSoftwareLog).filter(TelescopeSoftwareLog.telescopemodeldate == date).first()
+    return render_template('viewlog.html', title='View', 
+                           date = date,
+                           obslogs=obslogs,
+                           proglogs=proglogs,
+                           activity_log=activity_log,
+                           failure_log=failure_log,
+                           weather_log=weather_log,
+                           focus_log=focus_log,
+                           telescope_software_log=telescope_software_log)
+    
+    
 @app.route('/prevlogs')
 def prevlogs():
-    return render_template('prevlogs.html', title='Previous Logs')
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    base_query = db.session.query(Obslog.obsdate).distinct().order_by(Obslog.obsdate.desc())
+    
+    total_dates = db.session.query(func.count(func.distinct(Obslog.obsdate))).scalar()
+    total_pages = math.ceil(total_dates / per_page) if total_dates else 1
+    
+    dates = (base_query
+             .limit(per_page)
+             .offset((page - 1) * per_page)
+             .all()
+            )
+    
+    return render_template('prevlogs.html', title='Previous Logs',dates=dates,total_pages=total_pages,page=page)
 
 @app.route('/preview', methods=['GET', 'POST'])
 def preview():
@@ -334,16 +369,14 @@ def currentlog():
                 
             proglog.progloc=form.progrow.data,
             proglog.progdtn=form.progdtn.data,
-            proglog.schedstart = None,
-            proglog.schedend = None,
-            proglog.weatherd=form.weatherdark.data,
-            proglog.weatherb=form.weatherbright.data,
-            proglog.equipd=form.equipmentdark.data,
-            proglog.equipb=form.equipmentbright.data,
-            proglog.obsd=form.obsdark.data,
-            proglog.obsb=form.obsbright.data,
-            proglog.notusedd=form.notuseddark.data,
-            proglog.notusedb=form.notusedbright.data,
+            proglog.weatherd=(form.weatherdark.data if form.weatherdark.data != '' else 0) or 0,
+            proglog.weatherb=(form.weatherbright.data if form.weatherbright.data != '' else 0) or 0,
+            proglog.equipd=(form.equipmentdark.data if form.equipmentdark.data != '' else 0) or 0,
+            proglog.equipb=(form.equipmentbright.data if form.equipmentbright.data != '' else 0) or 0,
+            proglog.obsd=(form.obsdark.data if form.obsdark.data != '' else 0) or 0,
+            proglog.obsb=(form.obsbright.data if form.obsbright.data != '' else 0) or 0,
+            proglog.notusedd=(form.notuseddark.data if form.notuseddark.data != '' else 0) or 0,
+            proglog.notusedb=(form.notusedbright.data if form.notusedbright.data != '' else 0) or 0,
             proglog.note=form.notes.data
         
         
