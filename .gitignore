@@ -1,0 +1,7 @@
+.flaskenv
+*.pyc
+*.log
+*.1
+*.ini
+/migrations
+*.pyc
