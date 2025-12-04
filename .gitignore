@@ -5,3 +5,4 @@
 *.ini
 /migrations
 *.pyc
+*.pyc
