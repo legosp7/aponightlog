@@ -149,10 +149,6 @@ def prefill(program):
             
         return {"prefill":data,"rules":rules}
 
-@app.route('/') 
-@app.route('/home')
-def home():
-    return render_template('home.html', title='Home')
 
 @app.route('/viewlog/<string:date>')
 def viewlog(date):
@@ -221,7 +217,7 @@ def preview():
                            telescope_software_log=telescope_software_log,
                            form=form)
 
-
+@app.route('/')
 @app.route('/currentlog', methods=['GET', 'POST'])
 def currentlog():
     form = CurrentLog()
