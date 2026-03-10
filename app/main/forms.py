@@ -1,3 +1,9 @@
+'''
+NAME: forms.py - Defines the forms used in the main blueprint of the Nightlog application.
+PURPOSE: This module contains the form classes that are used to handle user input for the observation logs, including fields for program details, weather conditions, activity logs, failure logs, focus logs, and telescope software versions. The forms also include validation logic to ensure that required fields are filled out based on the selected program.
+'''
+
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TimeField, SelectField, TextAreaField, RadioField, FloatField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length, Optional

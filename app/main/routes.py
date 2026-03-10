@@ -1,8 +1,15 @@
+'''
+NAME:  routes.py - Defines the routes and view functions for the Nightlog application.
+PURPOSE: This module contains the route definitions and view functions for handling user interactions with 
+the Nightlog application.'''
+
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
-from app import app, db
+from app import db
+from app.main import bp
 from flask import Blueprint,render_template, flash, redirect, url_for, request, jsonify
-from app.forms import CurrentLog, emailForm
+from app.main.forms import CurrentLog, emailForm
 import sqlalchemy as sa
 from datetime import date, datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -12,20 +19,33 @@ from urllib.parse import urlsplit
 from app.email import send_preview
 import math
 
-#change the today, otherwise will reset and not work past 12 am every day
 
-def hhmm(t):
+def hhmm(t: datetime.time) -> str:
+    '''
+    Convert a time object to a string in HH:MM format.
+    Args:
+    t: A time object to be converted.'''
     if t is None:
         return ''
     return f"{t.hour:02d}:{t.minute:02d}"
     
 def default_times():
+    '''
+    Get the default start and end times for the observation log, which are the current hour and the next hour.
+    Returns:
+    A tuple containing the default start and end times in HH:MM format.'''
     now = datetime.now()
     start = now.replace(second=0, microsecond=0)
     end = (start + timedelta(hours=1))
     return start.strftime("%H:%M"), end.strftime("%H:%M")
     
-def prefill_failure(program):
+def prefill_failure(program: str) -> dict:
+    '''
+    Get the latest failure log for the given program and prefill the form fields accordingly.
+    Args:
+    program: The program for which to prefill the failure log form.
+    Returns:
+    A dictionary containing the prefill data and rules for the failure log form.'''
     today = date.today()
     latest = db.session.query(FailureLog).filter(FailureLog.progdate == program + today.strftime("%y%m%d")).first()
     return {
@@ -44,8 +64,10 @@ def prefill_failure(program):
         }
     }
     
-def prefill(program):
-        '''get the program rules from the database and set the form fields accordingly'''
+def prefill(program: str) -> dict:
+        '''get the program rules from the database and set the form fields accordingly
+        Args:
+        program: The program for which to prefill the form.'''
         today = date.today()
         
         if program == 'Weather':
@@ -100,22 +122,6 @@ def prefill(program):
                 }
             }
             
-        # if program == 'Failure Log':
-        #     latest = db.session.query(FailureLog).filter(FailureLog.progdate == program + today.strftime("%y%m%d")).first()
-        #     return {
-        #         'prefill': {
-        #             'instrumentfail': (latest.instrument if latest else '') or '',
-        #             'TI': (latest.TI if latest else '') or '',
-        #             'SHU': (latest.SHU if latest else '') or '',
-        #             'failstart': (hhmm(latest.FAILSTART) if latest else default_times()[0]) or '',
-        #             'failend': (hhmm(latest.FAILEND) if latest else default_times()[1]) or '',
-        #             'failnote': (latest.FAILDISC if latest else '') or ''
-        #         },
-        #         "rules": {
-        #             "show": ["progfail", "instrumentfail", "TI", "SHU", "failstart", "failend", "failnote"],
-        #             "required_fields": ["progfail", "instrumentfail", "TI", "SHU", "failstart", "failend"]
-        #         }
-        #     }
             
         latest = db.session.query(Obslog).filter(Obslog.prog == program,Obslog.obsdate==today).first()
         latestprog = db.session.query(Proglog).filter(Proglog.progid == program, Proglog.dateprog.like('%'+today.strftime("%y%m%d"))).first()
@@ -150,8 +156,14 @@ def prefill(program):
         return {"prefill":data,"rules":rules}
 
 
-@app.route('/viewlog/<string:date>')
-def viewlog(date):
+@bp.route('/viewlog/<string:date>')
+def viewlog(date: str) -> str:
+    '''
+    Render the view log page for a specific date, displaying all logs associated with that date.
+    Args:
+    date: The date for which to view the logs, in YYYY-MM-DD format.
+    
+    Returns: A rendered template for the view log page, with all logs for the specified date.'''
     obslogs = db.session.query(Obslog).filter(Obslog.obsdate == date).all()
     proglogs = db.session.query(Proglog).filter(Proglog.dateprog.like('%'+date)).all()
     activity_log = db.session.query(ActivityLog).filter(ActivityLog.activitydate == date).first()
@@ -170,8 +182,15 @@ def viewlog(date):
                            telescope_software_log=telescope_software_log)
     
     
-@app.route('/prevlogs')
-def prevlogs():
+@bp.route('/prevlogs')
+def prevlogs() -> str:
+    '''
+    Render the previous logs page, displaying a paginated list of distinct observation dates for which logs exist.
+    The page number is determined by the 'page' query parameter, and the number of logs per page is set to 10.
+    
+    returns: A rendered template for the previous logs page, with a list of distinct observation dates and pagination controls.
+    '''
+    
     page = request.args.get('page', 1, type=int)
     per_page = 10
     base_query = db.session.query(Obslog.obsdate).distinct().order_by(Obslog.obsdate.desc())
@@ -187,9 +206,12 @@ def prevlogs():
     
     return render_template('prevlogs.html', title='Previous Logs',dates=dates,total_pages=total_pages,page=page)
 
-@app.route('/preview', methods=['GET', 'POST'])
-def preview():
-    '''renders the preview page with today's log'''
+@bp.route('/preview', methods=['GET', 'POST'])
+def preview() -> str:
+    '''renders the preview page with today's log
+    
+    returns: A rendered template for the preview page, with today's logs and a form to send a preview email.'''
+    
     #grab the logs
     today = date.today()
     obslogs = db.session.query(Obslog).filter(Obslog.obsdate == today).all()
@@ -217,9 +239,16 @@ def preview():
                            telescope_software_log=telescope_software_log,
                            form=form)
 
-@app.route('/')
-@app.route('/currentlog', methods=['GET', 'POST'])
-def currentlog():
+@bp.route('/')
+@bp.route('/currentlog', methods=['GET', 'POST'])
+def currentlog() -> str:
+    '''
+    Render the current log page, allowing users to view and update the log for today's date. 
+    The form is prefilled with existing data if available, and the program choices are populated from the database.
+    
+    returns:
+    A rendered template for the current log page, with the form and any flash messages.
+    '''
     form = CurrentLog()
     form.prog.choices = form.get_today_progs() + [('Activity','Activity'),
                                                   ('Failure Log','Failure Log'),('Focus Log','Focus Log'),
@@ -386,15 +415,27 @@ def currentlog():
             
     return render_template('currentlog.html', title='Current Log', form=form)
 
-@app.get("/obslog/prefill/<string:prog_value>")
-def obslog_prefill(prog_value):
+@bp.get("/obslog/prefill/<string:prog_value>")
+def obslog_prefill(prog_value: str) -> str:
+    '''
+    Get the prefill data and rules for a specific program value, and return it as a JSON response.
+    Args:
+        prog_value: The program value for which to get the prefill data and rules.
+    Returns:
+        A JSON response containing the prefill data and rules for the specified program value. If the program value is not valid, a 404 response is returned.'''
     valid_values = [prog for prog, _ in CurrentLog().get_today_progs()]
     if prog_value not in valid_values and prog_value.lower() not in ['activity', 'failure log', 'focus log', 'weather', 'telescope software']:
         return jsonify({"prefill": {}, "rules": {"show": [], "required_fields": []}}), 404
     return jsonify(prefill(prog_value))
     
-@app.get("/obslog/prefill_failure/<string:prog_value>")
-def obslog_prefill_failure(prog_value):
+@bp.get("/obslog/prefill_failure/<string:prog_value>")
+def obslog_prefill_failure(prog_value: str) -> str:
+    '''
+    Get the prefill data and rules for a specific program value for the failure log, and return it as a JSON response.
+    Args:
+        prog_value: The program value for which to get the prefill data and rules for the failure log.
+    Returns:
+        A JSON response containing the prefill data and rules for the specified program value for the failure log. If the program value is not valid, a 404 response is returned.'''
     valid_values = [prog for prog, _ in CurrentLog().get_today_progs()]
     if prog_value not in valid_values:
         return jsonify({"prefill": {}, "rules": {"show": [], "required_fields": []}}), 404

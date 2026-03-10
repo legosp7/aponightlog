@@ -13,9 +13,9 @@
     </head>
     <body>
         <div>Nightlog: 
-            <a href="{{ url_for('currentlog') }}">Current Log</a>
-            <a href="{{ url_for('prevlogs') }}">Previous Logs</a>
-            <a href="{{ url_for('preview') }}">Preview</a>
+            <a href="{{ url_for('main.currentlog') }}">Current Log</a>
+            <a href="{{ url_for('main.prevlogs') }}">Previous Logs</a>
+            <a href="{{ url_for('main.preview') }}">Preview</a>
         </div>
         <hr>
         {% with messages = get_flashed_messages() %}

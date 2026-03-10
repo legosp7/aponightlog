@@ -1,3 +1,8 @@
+'''
+NAME:   autofill.py - Web crawling and database filling for the Nightlog application.
+PURPOSE: This module contains functions to crawl the 35m schedule website, extract the relevant data, and fill the Obslog and Proglog tables in the database. It uses the APScheduler library to schedule the autofill function to run every day at a specific time (e.g., 4 PM MST) to keep the database updated with the latest schedule information.
+'''
+
 from urllib.request import urlopen
 from lxml import html
 import schedule
@@ -5,24 +10,52 @@ from datetime import datetime, date
 import sqlalchemy as sa
 import pandas
 from app import app,db
-from app.models import Obslog, Proglog
+from app.main import bp #remove?
+from flask import current_app
+from app.models import Obslog, Proglog, LogDate
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
+#all possible instruments and their mappings to the database
 INSTRUMENTS = {'A': 'APOLLO', 'E': 'Echelle', 'EK': 'EK', 'EKR': 'EKR', 'K':'KOSMOS',
                'K(D)':'K(D)', 'KE': 'KE', 'K(R)':'K(R)', 'KR':'KR', 'N':'NIC-FPS','R':'ARCTIC','R(K)':'R(K)',
                'T':'TripleSpec', 'V':'VS', 'X':'X',}
 
 
-def web_crawl_and_fill():
+def web_crawl_and_fill() -> pandas.DataFrame:
+    '''
+    Web crawl the 35m schedule website, extract the relevant data, and return it as a pandas DataFrame.
+    Returns:
+        A pandas DataFrame containing the schedule information extracted from the website.
+    '''
     #first, get the current date
     today = datetime.now()
     #format the date to match the URL format
     date_str = today.strftime('%Y-%m-%d')
     #date_str = '2025-08-01'
     #construct the URL
-    url = f'http://35m-schedule.apo.nmsu.edu/2025-11-21.3/html/days/{date_str}.html'
-    page = urlopen(url)
+    try: 
+        url = f'http://35m-schedule.apo.nmsu.edu/{date_str}.1/html/days/{date_str}.html' #try to grab today's string
+        page = urlopen(url)
+        #if it works, update the date in LogDate table to today's date
+        with app.app_context():
+            log_date = db.session.scalar(sa.select(LogDate).where(LogDate.id == 1))
+            if log_date is None:
+                log_date = LogDate(id=1, date=today)
+                db.session.add(log_date)
+            else:
+                log_date.date = today
+            db.session.commit()
+    except: 
+        #otherwise, grab the date from the db
+        print("Unable to access schedule website, using last date in LogDate table.")
+        with app.app_context():
+            log_date = db.session.scalar(sa.select(LogDate).where(LogDate.id == 1))
+            if log_date is None:
+                raise Exception("No date in LogDate table, and unable to access schedule website.")
+            last_date = log_date.logdate.strftime('%Y-%m-%d')
+        url = f'http://35m-schedule.apo.nmsu.edu/{last_date}.1/html/days/{date_str}.html'
+        page = urlopen(url)
     htmlbites = page.read().decode('utf-8')
     tree = html.fromstring(htmlbites)
     link_trees = tree.xpath('//a/text()')
@@ -48,7 +81,12 @@ def web_crawl_and_fill():
     return (df)
 
 
-def fill_db():
+def fill_db() -> None:
+    '''
+    Fill the Obslog and Proglog tables in the database with the schedule information extracted from the 35m schedule website.
+    Returns:
+        None
+    '''
     print('Running!')
     with app.app_context():
         df = web_crawl_and_fill()
@@ -112,7 +150,7 @@ def sensor():
     print("Sensor is running...")
     
 #when testing, using below. for production, uncomment the scheduler instead
-#fill_db()  # Initial fill of the database
+fill_db()  # Initial fill of the database
 
 #below is the normal autofill, it runs every day at 4pm MST
 # sched = BackgroundScheduler(daemon=True)
